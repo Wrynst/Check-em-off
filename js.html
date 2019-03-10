@@ -1,0 +1,84 @@
+<script>
+window.addEventListener('load', function() {
+   google.script.run.withSuccessHandler(displayData).getData();
+   google.script.run.withSuccessHandler(displayNav).makeNavButtons();
+})
+
+function displayNav(navData){
+  var navElement = document.getElementById("menu");
+  navElement.innerHTML = '<h1 class="brand">OPS</h1>' + navData;        //should probably change the h1 to a logo class
+  
+  }
+  
+function displayData(data){
+  var dataElement = document.getElementById("data-div");
+  dataElement.innerHTML =  data;
+ 
+  }
+// houseN was supposed to be a string of the name of the house being submitted.  It actually came through as the full HTML DIV object... Surprise!  
+function sendChecks(houseN){
+  var checker = [];
+  var ranger = [];
+  var texter = [];
+  var i , j, k;
+  var house = houseN.id;   // To get the name of the house
+  var date = new Date();
+  var checks    = document.querySelectorAll('#'+CSS.escape(house)+' input[type=checkbox]');  // CSS.escape in querySelector if you are trying to use a variable masquerading as a CSS property
+  var ranges    = document.querySelectorAll('#'+CSS.escape(house)+' input[type=range]');
+  var textAreas = document.querySelectorAll('#'+CSS.escape(house)+' textarea');
+  
+  var checksLen    = checks.length;
+  var rangesLen    = ranges.length;
+  var textAreasLen = textAreas.length;
+  
+  // date name slider slider checkbox checkbox checkbox ect   <-Header desired outcome
+  for( j=0 ; rangesLen > j; j++ ) {
+    ranger.push({"name" : ranges[j].name, "criteria" : ranges[j].attributes.label.nodeValue, "value" : ranges[j].value})
+   }
+    
+  for( i=0 ; checksLen > i ; i++ ) { 
+    ranger.push({"name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked});
+   
+   }
+  for( k=0 ; textAreasLen > k ; k++ ) { 
+    texter.push(textAreas[k].value, textAreas[k].name );
+   }
+  
+  
+  console.log(texter);
+  console.log(ranger);
+  google.script.run.withSuccessHandler(notifyUser).submitChecks(ranger); 
+  
+}
+
+function notifyUser() {
+
+
+}
+
+function openLink(evt, house) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("ncard");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" menu-select w3-animate-right", "");
+  }
+  document.getElementById(house).style.display = "block";
+   evt.currentTarget.className += " menu-select w3-animate-right";
+  document.getElementById('submit-checks'+house).style.display = "block";
+ 
+} 
+
+
+function slid(value){
+var val = value;
+val.parentNode.previousSibling.lastChild.textContent = val.value;
+}
+
+
+
+</script>
+
