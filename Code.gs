@@ -45,7 +45,7 @@ var empChecks;
  * 
  *  
  * @return {string} HTML output for The cards
- */
+**/
 function getData() {
   return houseList.map ( function ( houseName ) {
     hName = houseName.toString(); 
@@ -81,13 +81,13 @@ function submitChecks(payload){
   var sheet = ss.getSheetByName('results');
  
   
-  var nameListH         = makeUniqueList('name', payload);
+  var nameListH  = makeUniqueList('name', payload);
   
   
     
     nameListH.forEach(function(name){ 
       var pusher = [];
-      pusher.push(new Date(), name);
+      pusher.push(new Date(), user, payload[0].house, name);
       payload.forEach(function(pay){
         Logger.log(pay);
       if(pay.name === name){

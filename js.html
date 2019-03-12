@@ -33,11 +33,11 @@ function sendChecks(houseN){
   
   // date name slider slider checkbox checkbox checkbox ect   <-Header desired outcome
   for( j=0 ; rangesLen > j; j++ ) {
-    ranger.push({"name" : ranges[j].name, "criteria" : ranges[j].attributes.label.nodeValue, "value" : ranges[j].value})
+    ranger.push({"house" : house, "name" : ranges[j].name, "criteria" : ranges[j].attributes.label.nodeValue, "value" : ranges[j].value})
    }
     
   for( i=0 ; checksLen > i ; i++ ) { 
-    ranger.push({"name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked});
+    ranger.push({"house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked});
    
    }
   for( k=0 ; textAreasLen > k ; k++ ) { 
