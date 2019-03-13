@@ -15,13 +15,18 @@ function displayData(data){
   dataElement.innerHTML =  data;
  
   }
-// houseN was supposed to be a string of the name of the house being submitted.  It actually came through as the full HTML DIV object... Surprise!  
-function sendChecks(houseN){
+  
+/*  
+ * 
+ * 
+ * @param{string} 
+**/  
+function sendChecks(houseN){  // houseN was supposed to be a string of the name of the house being submitted.  It actually came through as the full HTML DIV object... Surprise!
   var checker = [];
   var ranger = [];
   var texter = [];
   var i , j, k;
-  var house = houseN.id;   // To get the name of the house
+  var house = houseN.id;      // To get the name of the house
   var date = new Date();
   var checks    = document.querySelectorAll('#'+CSS.escape(house)+' input[type=checkbox]');  // CSS.escape in querySelector if you are trying to use a variable masquerading as a CSS property
   var ranges    = document.querySelectorAll('#'+CSS.escape(house)+' input[type=range]');
@@ -37,8 +42,10 @@ function sendChecks(houseN){
    }
     
   for( i=0 ; checksLen > i ; i++ ) { 
+  if(checks[i].name.indexOf('@') == -1){
     ranger.push({"house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked});
-   
+   }else{
+    texter.push({"house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked});
    }
   for( k=0 ; textAreasLen > k ; k++ ) { 
     texter.push(textAreas[k].value, textAreas[k].name );
@@ -48,7 +55,7 @@ function sendChecks(houseN){
   console.log(texter);
   console.log(ranger);
   google.script.run.withSuccessHandler(notifyUser).submitChecks(ranger); 
-  
+  google.script.run.withSuccessHandler(notifyUser).submitChecks(texter); 
 }
 
 function notifyUser() {

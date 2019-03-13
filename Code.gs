@@ -42,8 +42,7 @@ var empChecks;
 /**
  * getData
  *
- * 
- *  
+ *
  * @return {string} HTML output for The cards
 **/
 function getData() {
@@ -76,15 +75,17 @@ function getData() {
   }).join('');
 }
 
+
+/*
+ *
+ *
+**/
 function submitChecks(payload){
-  var ss = SpreadsheetApp.openById(ssidOut);
+  var ss = SpreadsheetApp.openById(ssidOut);                 //
   var sheet = ss.getSheetByName('results');
- 
-  
+   
   var nameListH  = makeUniqueList('name', payload);
-  
-  
-    
+      
     nameListH.forEach(function(name){ 
       var pusher = [];
       pusher.push(new Date(), user, payload[0].house, name);
@@ -92,13 +93,10 @@ function submitChecks(payload){
         Logger.log(pay);
       if(pay.name === name){
         pusher.push(pay.criteria, pay.value)
-      }
-        
+      }        
     });
   sheet.appendRow(pusher);
-  });
-  
-  
+  });  
 }
 
 function makeNavButtons() {
