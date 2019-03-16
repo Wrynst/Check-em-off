@@ -36,28 +36,34 @@ function sendChecks(houseN){  // houseN was supposed to be a string of the name 
   var rangesLen    = ranges.length;
   var textAreasLen = textAreas.length;
   
-  // date name slider slider checkbox checkbox checkbox ect   <-Header desired outcome
   for( j=0 ; rangesLen > j; j++ ) {
-    ranger.push({"house" : house, "name" : ranges[j].name, "criteria" : ranges[j].attributes.label.nodeValue, "value" : ranges[j].value})
-   }
+    ranger.push( { "house" : house, "name" : ranges[j].name, "criteria" : ranges[j].attributes.label.nodeValue, "value" : ranges[j].value } );
+  }
     
   for( i=0 ; checksLen > i ; i++ ) { 
-  if(checks[i].name.indexOf('@') == -1){
-    ranger.push({"house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked});
-   }else{
-    texter.push({"house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked});
-   }
+    
+    if( checks[i].name.indexOf( '@' ) == -1 ) {
+ 
+      ranger.push( { "house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked } );
+    
+    }else{
+  
+      texter.push( { "house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked } );
+    }
+  }
+  
   for( k=0 ; textAreasLen > k ; k++ ) { 
-    texter.push(textAreas[k].value, textAreas[k].name );
-   }
   
+    texter.push( { "criteria" : textAreas[k].name, "value" : textAreas[k].value } );
   
+  }
+
   console.log(texter);
   console.log(ranger);
   google.script.run.withSuccessHandler(notifyUser).submitChecks(ranger); 
-  google.script.run.withSuccessHandler(notifyUser).submitChecks(texter); 
-}
+  google.script.run.withSuccessHandler(console.log('I am success handler')).submitEmail(texter); 
 
+}
 function notifyUser() {
 
 
@@ -74,18 +80,14 @@ function openLink(evt, house) {
     tablinks[i].className = tablinks[i].className.replace(" menu-select w3-animate-right", "");
   }
   document.getElementById(house).style.display = "block";
-   evt.currentTarget.className += " menu-select w3-animate-right";
+  evt.currentTarget.className += " menu-select w3-animate-right";
   document.getElementById('submit-checks'+house).style.display = "block";
  
 } 
 
-
 function slid(value){
-var val = value;
-val.parentNode.previousSibling.lastChild.textContent = val.value;
+  var val = value;
+  val.parentNode.previousSibling.lastChild.textContent = val.value;
 }
 
-
-
 </script>
-
