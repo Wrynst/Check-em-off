@@ -5,24 +5,36 @@ var ssOut            = SpreadsheetApp.openById(ssidOut);
 var incoming         = openSheetObjectifiyData(ssidInc,  'What Is needed');
 var options          = openSheetObjectifiyData(ssidOut,         'Options');
 
-var houseList        = makeUniqueList('house',               incoming);
-var nameList         = makeUniqueList('name',                incoming);
+var houseList        = makeUniqueList(  'house',               incoming);
+var nameList         = makeUniqueList(  'name',                incoming);
 
-var amCrit           = makeUniqueList('criteriaAm',           options);
-var pmCrit           = makeUniqueList('criteriaPm',           options);   
-var empNames         = makeUniqueList('employeeNames',        options);
-var empAmCrit        = makeUniqueList('empCriteriaAm',        options);
-var empPmCrit        = makeUniqueList('empCriteriaPm',        options);
-var cutOffTime       = makeUniqueList('amPmSwitch',           options);
-var sliders          = makeUniqueList('sliders',              options);
-var textAPlaceH      = makeUniqueList('textareaPlaceholders', options);
-var submitEmails       = makeUniqueList('sendEmail',            options);
+var amCrit           = makeUniqueList(  'criteriaAm',           options);
+var pmCrit           = makeUniqueList(  'criteriaPm',           options);   
+var empNames         = makeUniqueList(  'employeeNames',        options);
+var empAmCrit        = makeUniqueList(  'empCriteriaAm',        options);
+var empPmCrit        = makeUniqueList(  'empCriteriaPm',        options);
+var cutOffTime       = makeUniqueList(  'amPmSwitch',           options);
+var sliders          = makeUniqueList(  'sliders',              options);
+var textAPlaceH      = makeUniqueList(  'textareaPlaceholders', options);
+var submitEmails     = makeUniqueList(  'sendEmail',            options);
 
 var dataIncNoEmpties = incoming.filter(function(row) { return row['name'] && row['house']});
-var today = new Date();
-var ampm = today.getHours(); 
-var hName = "";
-var user = Session.getActiveUser().getEmail();
+var today            = new Date();
+var ampm             = today.getHours(); 
+var dateOnly         = today.toDateString();
+var hName            = "";
+var user             = Session.getActiveUser().getEmail();
+
+var coastlineLogoUrl = "https://coastlinerehabcenters.com/wp-content/uploads/2017/05/rehabcentersorangecounty-huntingtonbeachdrugtreatment-hp.png";
+var jointCommissionLogoUrl = "https://s3-us-west-1.amazonaws.com/coastlinebehavioralhealth/wp-content/uploads/2018/11/04025907/jointcommission-logo-cbh-min.jpg";
+var coastlineLogoBlob       = UrlFetchApp
+                            .fetch(coastlineLogoUrl)
+                            .getBlob()
+                            .setName("coastlineLogoBlob");
+var jointCommissionLogoBlob = UrlFetchApp
+                            .fetch(jointCommissionLogoUrl)
+                            .getBlob()
+                            .setName("jointCommissionLogoBlob");
 
 function doGet() {
   
@@ -42,7 +54,7 @@ function checkTime(emp){
   }
 }
 var ampmFlag = (ampm > cutOffTime[0] ? "PM" : "AM");
-  
+var ampmEmoji = (ampmFlag === 'PM' ? '🌛' : '🌞');
 var empChecks;
 /**
  * getData
@@ -82,22 +94,69 @@ function getData() {
 
 function submitEmail(emailData){
   var emailDataSheet = ssOut.getSheetByName('results2');
-  pusher = [];
-  pusher.push(today, emailData[0].name, emailData[0].house);
-  emailData.forEach(function(entry){
-    pusher.push(entry.criteria, entry.value);
-  });
-  emailDataSheet.appendRow(pusher);
+ 
+  pusher             = [];
+  //htmlPusher         = [];
   
-  var emailBodyData = pusher.toString();
-  var body = "Hello!  If you have received this email, you have been selected to beta test Emily's App! May fortune continue to smile upon you and grant a bountiful inbox! " + emailBodyData;
+  pusher.push(today, emailData[0].name, emailData[0].house);
+  var htmlPusher = emailData.map(function(entry){
+    pusher.push(entry.criteria, entry.value);
+    return '<tr><td valign="top">' + entry.criteria + '</td><td valign="top">' + entry.value + '</td></tr>'
+  }).join('');
+  Logger.log(pusher);
+  emailDataSheet.appendRow(pusher);
+  var subject        = ampmEmoji + ' ' + emailData[0].house + ' ' + ampmFlag + ' Submission by ' + user + ' ' + dateOnly;
+  var emailBodyData  = pusher.toString();
+  var body           = "Hello!  If you have received this email, you have been selected to beta test Emily's App! May fortune continue to smile upon you and grant a bountiful inbox! " + emailBodyData;
+  var htmlEmail      = HtmlService.createTemplateFromFile('email');
+  
+  htmlEmail.data1    = emailData[0].house + ' ' + ampmFlag + ' ✅ ' + dateOnly ;
+  htmlEmail.subBy    = 'Submitted by ' + user; 
+  htmlEmail.dataUL   = htmlPusher.toString();
+  
+  finalBody = htmlEmail.evaluate().getContent();
+                    
   submitEmails.forEach(function(email){
   
-    MailApp.sendEmail(email, "💤 Don't sleep on this news!" , body);
+    MailApp.sendEmail({
+      to: email, 
+      subject: subject, 
+      htmlBody: finalBody,
+      inlineImages: {
+                      coastlineLogo: coastlineLogoBlob,
+                      jointCommissionLogo: jointCommissionLogoBlob
+                    }
+
+    });
     
   });
   return true
 }
+
+function inlineImage() {
+  var coastlineLogoUrl = "https://coastlinerehabcenters.com/wp-content/uploads/2018/06/coastline-behavioral-health.png";
+  var jointCommissionLogoUrl = "https://s3-us-west-1.amazonaws.com/coastlinebehavioralhealth/wp-content/uploads/2018/11/04025907/jointcommission-logo-cbh-min.jpg";
+  var coastlineLogoBlob       = UrlFetchApp
+                              .fetch(coastlineLogoUrl)
+                              .getBlob()
+                              .setName("coastlineLogoBlob");
+  var jointCommissionLogoBlob = UrlFetchApp
+                              .fetch(jointCommissionLogoUrl)
+                              .getBlob()
+                              .setName("jointCommissionLogoBlob");
+  MailApp.sendEmail({
+    to: "arnold10034@hotmail.com",
+    subject: "Logos",
+    htmlBody: "Coastline Logo<img src='cid:coastlineLogo'> images! <br>" +
+              "inline Joint Commission Logo <img src='cid:jointCommissionLogo'>",
+    inlineImages:
+      {
+        coastlineLogo: coastlineLogoBlob,
+        jointCommissionLogo: jointCommissionLogoBlob
+      }
+  });
+}
+
 
 /*
  *
@@ -133,5 +192,8 @@ function makeNavButtons() {
 
 function test(){
  // Logger.log(HtmlService.createTemplateFromFile('index').getCode());
-  Logger.log(ampmFlag);
+  var html = HtmlService.createTemplateFromFile('email');
+  html.data1 = 'data1 rulz';
+  html.data2 = 'no data' + 2;
+  Logger.log(html.evaluate().getContent());
 }

@@ -1,20 +1,22 @@
 <script>
 window.addEventListener('load', function() {
-   google.script.run.withSuccessHandler(displayData).getData();
-   google.script.run.withSuccessHandler(displayNav).makeNavButtons();
+  google.script.run.withSuccessHandler(displayData).getData();
+  google.script.run.withSuccessHandler(displayNav).makeNavButtons();
+   
 })
 
 function displayNav(navData){
   var navElement = document.getElementById("menu");
   navElement.innerHTML = '<h1 class="brand">OPS</h1>' + navData;        //should probably change the h1 to a logo class
-  
-  }
+}
   
 function displayData(data){
   var dataElement = document.getElementById("data-div");
   dataElement.innerHTML =  data;
- 
-  }
+}
+  
+
+  
   
 /*  
  * 
@@ -53,7 +55,7 @@ function sendChecks(houseN){  // houseN was supposed to be a string of the name 
   }
   
   for( k=0 ; textAreasLen > k ; k++ ) { 
-  
+    textAreas[k].value == '' ? 'Left Blank' : textAreas[k].value;
     texter.push( { "criteria" : textAreas[k].name, "value" : textAreas[k].value } );
   
   }
@@ -61,7 +63,10 @@ function sendChecks(houseN){  // houseN was supposed to be a string of the name 
   console.log(texter);
   console.log(ranger);
   google.script.run.withSuccessHandler(notifyUser).submitChecks(ranger); 
-  google.script.run.withSuccessHandler(console.log('I am success handler')).submitEmail(texter); 
+  google.script.run.withSuccessHandler(display).submitEmail(texter); 
+
+}
+function display(){
 
 }
 function notifyUser() {
