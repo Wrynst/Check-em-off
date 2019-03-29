@@ -59,11 +59,9 @@ function sendChecks(houseN){  // houseN was supposed to be a string of the name 
     texter.push( { "criteria" : textAreas[k].name, "value" : textAreas[k].value } );
   
   }
-
-  console.log(texter);
-  console.log(ranger);
+  var rangerTexter = [ranger,texter];
   google.script.run.withSuccessHandler(notifyUser).submitChecks(ranger); 
-  google.script.run.withSuccessHandler(display).submitEmail(texter); 
+  google.script.run.withSuccessHandler(display).submitEmail(rangerTexter); 
 
 }
 function display(){
