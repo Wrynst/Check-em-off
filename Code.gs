@@ -70,23 +70,31 @@ function getData() {
     
     var lastPart         = '';
     var empCard;
-    var textAreas              = textAPlaceH.map(function(tArea){ return '<textarea class="prompts w3-card" size="100" placeholder="'+tArea+'" name="'+tArea+'"></textarea><br>'}).join('');
-    var commentAndSubmitButton = '<div id="submit-checks'+ hName +'" class="w3-container w3-animate-left" style="display:none">'+textAreas+'<button class="w3-button w3-green w3-round" onclick="sendChecks('+ hName.toString() +')"><span class="mdi mdi-checkbox-multiple-marked-outline"> Submit</span></button></form></div>';
+    var textAreas              = textAPlaceH.map( function( tArea ){ return '<textarea class="prompts w3-card" size="100" placeholder="'+ tArea +'" name="'+ tArea +'"></textarea><br>'}).join('');
+    var commentAndSubmitButton = '<div id="submit-checks'+ hName +'" class="w3-container w3-animate-left" style="display:none">'+ textAreas +'<button class="w3-button w3-green w3-round" onclick="sendChecks('+ hName.toString() +')"><span class="mdi mdi-checkbox-multiple-marked-outline"> Submit</span></button></form></div>';
     
     var tabby            = '<div id="'+houseName+'" class="w3-container ncard w3-animate-left" style="display:none">';
       var inside         = dataIncNoEmpties.map ( function ( row ) { 
+        
         if ( row.house === houseName ) {
           var div        = '<div class="w3-card item"><header class="w3-container item-header"><h2>'+ row.name +'</h2></header><div class="w3-container item-content"><form>';
-          var empDiv     = '<div class="w3-card item"><header class="w3-container emp-header"><h3>'+today.toDateString()+'</h3></header><div class="w3-container item-content"><form><h6>'+(ampm > cutOffTime[0] ? "PM Schedule" : "AM Schedule")+'</h6>';
-          var sliderHTML = sliders.map(function(topic){ return '<h5>'+topic+' <span class="num">3</span></h5><div class="slidecontainer"><input type="range" min="1" max="5" value="3" label="'+topic+'" class="slider myRange" oninput="slid(this)" name="'+row.name+'"></div>'}).join('');
-          var checkboxes = checkTime().map ( function ( r ) { 
+          var empDiv     = '<div class="w3-card item"><header class="w3-container emp-header"><h3>'+ today.toDateString() +'</h3></header><div class="w3-container item-content"><form><h6>'+ ( ampm > cutOffTime[0] ? "PM Schedule" : "AM Schedule")+'</h6>';
+          
+          var sliderHTML = sliders.map( function( topic ){ 
+            return '<h5>'+topic+' <span class="num">3</span></h5><div class="slidecontainer"><input type="range" min="1" max="5" value="3" label="'+ topic +'" class="slider myRange" oninput="slid(this)" name="'+row.name+'"></div>'}).join('');
+          
+          var checkboxes = checkTime().map ( function( r ) { 
             return '<label class="container '+hName+'">'+ r +'<br><input type="checkbox" name="'+ row.name +'" value="'+ r +'"><span class="checkmark"></span></label>' }).join('');
-          var empChecks  = checkTime(emp).map(function(empCheckBox) {
+          
+          var empChecks  = checkTime(emp).map( function( empCheckBox ) {
             return '<label class="container '+hName+'">'+ empCheckBox +'<br><input type="checkbox" name="'+ user +'" value="'+ empCheckBox +'"><span class="checkmark"></span></label>'}).join('');
+          
           var cardFooter = '</div><footer class="w3-container item-footer"><span class="mdi mdi-hotel"> '+ row.bed +'</span>  |  <span class="mdi mdi-briefcase-account"> ' + row.caseManager + '</span>  |  <span class="mdi mdi-home">' + row.house + '</span></footer></div>';
           var empFooter  = '</div><footer class="w3-container emp-footer">'+ user +'</footer></div>';
+          
           empCard        = empDiv + empChecks + empFooter;
           lastPart       = div + sliderHTML + '<hr/>' + checkboxes + cardFooter;
+          
           return lastPart;
         }
       }).join('');
@@ -96,58 +104,64 @@ function getData() {
 
 
 // This builds the HTML email and then sends it out.  It also Appends the data to results2 sheet. I should probably refactor..
-function submitEmail(rangerTexter){
-  var emailDataSheet     = ssOut.getSheetByName('results2');
-  var results1           = rangerTexter[0];
-  var emailData          = rangerTexter[1]; //emailData is what shows up on results2 - should probably change the var name to reflect it
+function submitEmail(rangerTexterEC){
+  var temp = rangerTexterEC;
+  Logger.log(temp[1][0]);
+  var textAreasSheet     = ssOut.getSheetByName('results2');
   
-  var pusher             = [];
+  var results1           = temp[0];  // results 1 all the individual Client cards
+  var textAreas          = temp[1];  // textAreas shows up on results2 
+  var empChecks          = temp[2];  // employee checkboxes for daily duties results2
+  
+  var pusher             = [];  // for pushing, of course!
   
   // Starts the sheet entry with a timestamp, the person's email submitting, and the house being submitted
-  pusher.push(today, emailData[0].name, emailData[0].house);
+  pusher.push(today, empChecks[0].name, empChecks[0].house);
   
-  // Makes a list of the names currently in the house that is being submitted
-  var ctInHouse = dataIncNoEmpties.filter(function(client){ return client.house === emailData[0].house });
+  // Makes an array of client objects for the ones currently in the house that is being submitted
+  var ctInHouse = dataIncNoEmpties.filter(function(client){ return client.house === results1[0].house });
   
   // the data from the employee
-  var htmlPusher = emailData.map(function(question){
-    pusher.push(question.criteria, question.value);  //while I'm looping here I take advantage and push my data to an array to insert into results2 sheet
-    
-    var firstPart = '<tr><td valign="top">' + question.criteria + '</td><td valign="top">';
-    if(question.value === false){
-      var secondPart = '<span class="bad-score">' + question.value + '</span>';
-    }else{
-      var secondPart = '<span class="good-score">' + question.value + '</span>';
-    };
-    return firstPart + secondPart + '</td></tr>';
-  }).join('');
+  function mapTop(rangerTexterArray){
+    var mapTop = rangerTexterArray.map(function(question){
+      pusher.push(question.criteria, question.value);  //while I'm looping here I take advantage and push my data to an array to insert into results2 sheet
+      
+      return colorCoded(question);
+
+    }).join('');
+    return mapTop;
+  }
+  var htmlPusher1 = mapTop(empChecks);
   
+  var htmlAreas = '<br>' + mapTop(textAreas) + '<br>';
   
+  //Logger.log('htmlPusher1 = %s /n and htmlAreas  = %s',htmlPusher1,htmlAreas);
   // apends a row to insert the data to results2 sheet
-  emailDataSheet.appendRow(pusher);  
+  textAreasSheet.appendRow(pusher);  
   
   // The individual CT scores in a table with a header of the CT name
   var htmlPusher2 = ctInHouse.map(function(ct){
-    var ctHeader = '<table border="0" cellspacing="0" cellpadding="1"><th colspan="2">' + ct.name + '</th>';
+    var ctHeader = '<table border="0" cellspacing="2" cellpadding="1"><th colspan="2">' + ct.name + '</th>';
     return ctHeader + results1.map(function(entry){
       if ( ct.name == entry.name){
-        return '<tr><td valign="top">' + entry.criteria + '</td><td valign="top">' + entry.value + '</td></tr>';
+        
+        return colorCoded(entry);
       };
-    }).join('') + '</table>';
+    }).join('') + '</table><br>';
   }).join('');
   
   // Put the 2 strings together to make the body of the HTML email
-  htmlPusher = '<table border="0" cellspacing="0" cellpadding="1">' + htmlPusher + '</table>';
-  htmlPusher += htmlPusher2;  
+  htmlPusher = '<table border="0" cellspacing="5" cellpadding="1">' + htmlPusher1 + htmlAreas + '</table><hr/>' + htmlPusher2;
+  Logger.log(htmlPusher);
   
   // make subject of the email 
-  var subject        = ampmEmoji + ' ' + emailData[0].house + ' ' + ampmFlag + ' Submission by ' + user + ' ' + dateOnly;  
+  var subject        = ampmEmoji + ' ' + results1[0].house + ' ' + ampmFlag + ' Submission by ' + user + ' ' + dateOnly;  
   
   // creates a template from the email.html file
   var htmlEmail      = HtmlService.createTemplateFromFile('NacheTML');
   
   // The Head of the whole email
-  htmlEmail.data1    = emailData[0].house + ' ' + ampmFlag + ' ✅ ' + dateOnly ;
+  htmlEmail.data1    = results1[0].house + ' ' + ampmFlag + ' ✅ ' + dateOnly ;
   htmlEmail.subBy    = 'Submitted by ' + user; 
   
   // The Body of the email
@@ -156,7 +170,7 @@ function submitEmail(rangerTexter){
   // This was kind of hard to figure out but you have to evaluate the template and then get a string of it. 
   // So the variables get rendered and then you turn it into a string to pass it to the Mail App as HTML.
   finalBody = htmlEmail.evaluate().getContent();
-  
+ // Logger.log(finalBody);
   // For each person on the email list - make an email.
   submitEmails.forEach(function(email){
     MailApp.sendEmail({
@@ -196,6 +210,25 @@ function submitChecks(payload){
   });  
 }
 
+function colorCoded(objRow){
+       
+   var firstPart = '<tr><td valign="top">' + objRow.criteria + '</td><td valign="top">';
+   var good = '<span class="good-score">' + objRow.value + '</span>';
+   var bad  = '<span class="bad-score">'  + objRow.value + '</span>'; 
+      if(objRow.value === false ){
+        var secondPart = bad;
+      }else if(objRow.value === true ){
+        var secondPart = good;
+      }else if(objRow.value > 3){
+        var secondPart = good;
+      }else if(objRow.value <= 3){
+        var secondPart = bad;
+      }else{
+        var secondPart = objRow.value;
+      };
+   return firstPart + secondPart + '</td></tr>';
+}
+
 function goldStatus(payload){
   
   var dayOfWeekNum = today.getDay();
@@ -228,9 +261,9 @@ function makeNavButtons() {
 
 function test(){
  // Logger.log(HtmlService.createTemplateFromFile('index').getCode());
-  var html = HtmlService.createTemplateFromFile('NacheTML');
-  html.data1 = 'data1 rulz';
-  html.subBy = 'no data' + 2;
-  html.dataUL = '<table><tr><th>row 1</th></tr><tr><th>row 2</th></tr></table>'
-  Logger.log(html.evaluate().getContent());
+//  var html = HtmlService.createTemplateFromFile('NacheTML');
+//  html.data1 = 'data1 rulz';
+//  html.subBy = 'no data' + 2;
+//  html.dataUL = '<table><tr><th>row 1</th></tr><tr><th>row 2</th></tr></table>'
+  Logger.log(mapTop(empChecks));
 }

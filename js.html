@@ -24,15 +24,15 @@ function displayData(data){
  * @param{string} 
 **/  
 function sendChecks(houseN){  // houseN was supposed to be a string of the name of the house being submitted.  It actually came through as the full HTML DIV object... Surprise!
-  var checker = [];
-  var ranger = [];
-  var texter = [];
-  var i , j, k;
-  var house = houseN.id;      // To get the name of the house
-  var date = new Date();
-  var checks    = document.querySelectorAll('#'+CSS.escape(house)+' input[type=checkbox]');  // CSS.escape in querySelector if you are trying to use a variable masquerading as a CSS property
-  var ranges    = document.querySelectorAll('#'+CSS.escape(house)+' input[type=range]');
-  var textAreas = document.querySelectorAll('#'+CSS.escape(house)+' textarea');
+  var empChecker   = [];
+  var ranger       = [];
+  var texter       = [];
+  var i, j, k;
+  var house        = houseN.id;      // To get the name of the house
+  var date         = new Date();
+  var checks       = document.querySelectorAll('#'+CSS.escape(house)+' input[type=checkbox]');  // CSS.escape in querySelector if you are trying to use a variable masquerading as a CSS property
+  var ranges       = document.querySelectorAll('#'+CSS.escape(house)+' input[type=range]');
+  var textAreas    = document.querySelectorAll('#'+CSS.escape(house)+' textarea');
   
   var checksLen    = checks.length;
   var rangesLen    = ranges.length;
@@ -50,18 +50,19 @@ function sendChecks(houseN){  // houseN was supposed to be a string of the name 
     
     }else{
   
-      texter.push( { "house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked } );
+      empChecker.push( { "house" : house, "name" : checks[i].name, "criteria" : checks[i].value, "value" : checks[i].checked } );
     }
   }
   
   for( k=0 ; textAreasLen > k ; k++ ) { 
-    textAreas[k].value == '' ? 'Left Blank' : textAreas[k].value;
+    (textAreas[k].value == "") ? textAreas[k].value = 'Left Blank' : textAreas[k].value;
     texter.push( { "criteria" : textAreas[k].name, "value" : textAreas[k].value } );
   
   }
-  var rangerTexter = [ranger,texter];
-  google.script.run.withSuccessHandler(notifyUser).submitChecks(ranger); 
-  google.script.run.withSuccessHandler(display).submitEmail(rangerTexter); 
+  var rangerTexterEC = [ranger,texter,empChecker];
+  console.log(rangerTexterEC);
+  //google.script.run.withSuccessHandler(notifyUser).submitChecks(ranger); 
+  google.script.run.withSuccessHandler(display).submitEmail(rangerTexterEC); 
 
 }
 function display(){
