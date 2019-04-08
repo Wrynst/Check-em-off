@@ -219,9 +219,9 @@ function colorCoded(objRow){
         var secondPart = bad;
       }else if(objRow.value === true ){
         var secondPart = good;
-      }else if(objRow.value > 3){
+      }else if(objRow.value >= 3){
         var secondPart = good;
-      }else if(objRow.value <= 3){
+      }else if(objRow.value < 3){
         var secondPart = bad;
       }else{
         var secondPart = objRow.value;
